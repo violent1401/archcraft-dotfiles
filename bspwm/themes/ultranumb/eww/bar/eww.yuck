@@ -1,0 +1,126 @@
+(deflisten workspace "scripts/workspaces")
+(defpoll time :interval "10s"  "date '+%H:%M'")
+(defpoll date :interval "10s"  "date '+ %A, %d %b, %Y'")
+(defvar time-visible false)
+(defvar eww "eww -c $HOME/.config/bspwm/themes/ultranumb/eww/bar")
+
+(defwidget workspaces []
+  (literal :content workspace))
+
+(defwidget time []
+	(box	:orientation "v" 
+			:class "time" 
+			:valign "center"
+	(button	:onclick "scripts/popup --calendar"
+			:tooltip "${date}"
+			:class "time-hour" time)
+	
+	)
+)
+
+;; (defwidget keyboard [] 
+;;   (box 
+;;     :class "kb_box"
+;;     :orientation "h"
+;;     :valign "fill"
+;;     :halign "center"
+;;     "|"
+;;     (box
+;;       :orientation "v"
+;;       :space-evenly "false"
+;;       :valign "center"
+;;       :halign "center"
+;;       (eventbox 
+;;         :cursor "pointer"
+;;         :tooltip "Change layout to US english"
+;;         (button
+;;           :class "${us_class}"
+;;           :onclick "scripts/kb_layouts set us"
+;;           :valign "center"
+;;           "US"))
+;;       (eventbox
+;;         :cursor "pointer"
+;;         :tooltip "Change layout to US spanish"
+;;         (button
+;;           :class "${es_class}"
+;;           :onclick "scripts/kb_layouts set es"
+;;           :valign "center"
+;;           "ES")
+;;           ))))
+
+(defwidget left []
+	(box :orientation "h" 
+		 :space-evenly false  
+     :halign "start"
+		 :class "right_modules"
+	(workspaces))
+)
+
+(defwidget center []
+	(box :orientation "h" 
+		  :space-evenly false  
+      :halign "center"
+		  :class "center_modules"
+	(label :text "${time}"))
+)
+
+(defwidget right []
+	(box :orientation "h" 
+		  :space-evenly false  
+      :halign "end"
+		  :class "left_modules"
+	(time)
+))
+
+
+(defwidget bar []
+  (box :class "eww_bar"
+       :orientation "h"
+  (left)
+  (center)
+  (right)
+    ))
+
+
+
+(defwindow example
+           :monitor 0
+           :geometry (geometry :x "0%"
+                               :y "5px"
+                               :width "99%"
+                               :height "30px"
+                               :anchor "top center")
+           :stacking "fg"
+           :reserve (struts :distance "40px" :side "top")
+           :windowtype "dock"
+           :wm-ignore false
+
+	(bar))
+
+;; calendar
+(defpoll calendar_day :interval "10h" "date '+%d'")
+(defpoll calendar_month :interval "10h" "date '+%m'")
+(defpoll calendar_year :interval "10h" "date '+%Y'")
+
+(defwidget cal []
+  (eventbox
+        :cursor "pointer"
+        :onhover "${eww} update media_bar_class_popup=\"bar_highlighted_popup\" && ${eww} update media_bar_is_active_popup=true"
+        :onhoverlost "scripts/popup --calendar"
+    (box :class "cal-box" 
+		 :orientation "h"
+	    (box :class "cal-inner-box"
+  	    (calendar :class "cal" 
+			    :day calendar_day 
+			    :month calendar_month 
+			    :year calendar_year)))      
+	)
+)
+
+;; Calendar Windows ;;
+(defwindow calendar
+	:geometry (geometry :x "85%" 
+						:y "40px" 
+						:width "270px" 
+						:height "60px")
+(cal))
